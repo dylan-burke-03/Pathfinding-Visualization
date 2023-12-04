@@ -1,6 +1,12 @@
 #pragma once
+#include <cmath>
 #include <SFML/Graphics.hpp>
+#include "graph.h"
+using namespace std;
 
+
+// key of map be node
+// contents of list would be nodes pointing to it
 /*
 Sunday:
     - Board drawing and click registration
@@ -13,25 +19,30 @@ Monday:
     - Final touches
 */
 
-void drawRectangle(int x, int y, sf::RenderWindow& window) {
-    sf::RectangleShape rect;
-    rect.setSize(sf::Vector2f(20, 20));
-    rect.setOutlineColor(sf::Color::White);
-    rect.setFillColor(sf::Color::Black);
-    rect.setOutlineThickness(1);
-    rect.setPosition(x, y);
-    window.draw(rect);
-}
-
-void drawGrid(int w, int h, sf::RenderWindow& window, int rect_width=20) {
-    for (int i = 40; i < w-40; i += rect_width) {
-        for (int j = 150; j < h-150; j += rect_width) {
-            drawRectangle(i, j, window);
+void generateGraph(int w, int h, sf::RenderWindow& window, AdjMatrix& graph, int rect_width=20) {
+    for (int i = 40; i < w-40; i+=rect_width) {
+        for (int j = 150; j < h-150; j+=rect_width) {
+            sf::RectangleShape rect; rect.setSize(sf::Vector2f(20, 20));
+            rect.setPosition(i, j); rect.setOutlineColor(sf::Color::Black);
+            rect.setOutlineThickness(1); rect.setFillColor(sf::Color::White);
+            graph.insertNode(floor(i/20), floor(j/20), i, j, rect);
+            graph.drawWall(i, j);
         }
     }
 }
 
-void drawButtons(int w, int h, sf::RenderWindow& window, sf::Event& e) {
+void drawGraph(sf::RenderWindow& window, AdjMatrix& graph) {
+    for (int i = 40; i < 1920-40; i+=20) {
+        for (int j = 150; j < 1080-150; j++) {
+            //auto node = graph.getNodeElement(i, j);
+            //if (node.traversible) node.grid_element.setFillColor(sf::Color::Black);
+            auto node = graph.getNodeElement(i, j);
+            window.draw(node.grid_element);
+        }
+    }
+}
+
+void drawButtons(int w, int h, sf::RenderWindow& window, sf::Event& e, sf::Mouse& m) {
     sf::RectangleShape start, a_star, dijkstra;
     sf::Vector2f rect_size = sf::Vector2f(150, 50);
     sf::Font serif; serif.loadFromFile("src/serif.otf");
@@ -55,9 +66,12 @@ void drawButtons(int w, int h, sf::RenderWindow& window, sf::Event& e) {
     window.draw(start_txt);
     window.draw(a_star_txt);
     window.draw(dijkstra_txt);
+    if (e.type == sf::Event::MouseButtonPressed)
+        auto pos = m.getPosition(window);
+
 }
 
-void drawBoard(int w, int h, sf::RenderWindow& window, sf::Event& e) {
-    drawGrid(w, h, window);
-    drawButtons(w, h, window, e);
+void drawBoard(int w, int h, sf::RenderWindow& window, sf::Event& e, sf::Mouse& m, AdjMatrix& graph) {
+    drawButtons(w, h, window, e, m);
+    drawGraph(window, graph);
 }
