@@ -46,7 +46,7 @@ void dijkstra(const vector<vector<Node>>& adjacencyMatrix, vector<vector<Node>>&
                 int x = now.x + i;
                 int y = now.y + j;
 
-                if (x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size()) {
+                if (x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && adjacencyMatrix[x][y] != 0) {
 
                     Node& adj = grid[x][y];
                     double distance = now.distance + sqrt(i * i + j * j);
