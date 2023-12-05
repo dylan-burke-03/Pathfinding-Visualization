@@ -10,9 +10,9 @@ public:
     int x, y;
     bool prevVisited;
     double distance;
-    Node& parent;
+    Node* parent;
 
-    Node(int x, int y, Node& defaultParent) : x(x), y(y), prevVisited(false), distance(INT_MAX), parent(defaultParent) {}
+    Node(int x, int y, Node* defaultParent) : x(x), y(y), prevVisited(false), distance(INT_MAX), parent(defaultParent) {}
 };
 
 struct CompareNodes {
@@ -28,7 +28,7 @@ void dijkstra(vector<vector<Node>>& grid, Node& begin, Node& end) {
 
     while (!pq.empty()) {
 
-        Node now = pq.top();
+        Node& now = pq.top();
         pq.pop();
 
         if (now.prevVisited) continue;
@@ -54,7 +54,7 @@ void dijkstra(vector<vector<Node>>& grid, Node& begin, Node& end) {
                     if (distance < adj.distance) {
 
                         adj.distance = distance;
-                        adj.parent = now;
+                        adj.parent = &now;
                         pq.push(adj);
 
                     }
