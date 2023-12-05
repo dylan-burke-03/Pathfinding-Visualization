@@ -11,10 +11,10 @@ struct Node { //Created a node struct to show necessary characteristics to compl
     double g;
     double h;
     double f;
-    Node* parent;
+    Node& parent;
     bool isObstacle;
 
-    Node(int x, int y) : x(x), y(y), g(0), h(0), f(0), parent(nullptr), isObstacle(false) {}
+    Node(int x, int y, const Node& parentNode) : x(x), y(y), g(0), h(0), f(0), parent(parentNode), isObstacle(false) {}
 
     double heuristic(const Node& end) const {
 
@@ -23,10 +23,21 @@ struct Node { //Created a node struct to show necessary characteristics to compl
     }
 };
 
-struct PickNode {
-    bool operator()(const Node* left, const Node* right) const {
+struct NodeEqual {
+    int x;
+    int y;
 
-        return left->f > right->f;
+    NodeEqual(int x, int y) : x(x), y(y) {}
+
+    bool operator()(const Node& node) const {
+        return node.x == x && node.y == y;
+    }
+};
+
+struct PickNode {
+    bool operator()(const Node& left, const Node& right) const {
+
+        return left.f > right.f;
 
     }
 };
@@ -41,7 +52,7 @@ bool checkValid(int x, int y, const vector<vector<int>>& grid) {
 // Function to get neighboring nodes based on the grid
 vector<Node*> findNeighbors(const Node& node, const vector<vector<int>>& grid) {
 
-    vector<Node*> neighbors;
+    vector<Node> neighbors;
     const int dx[] = {1, -1, 0, 0};
     const int dy[] = {0, 0, 1, -1};
 
@@ -52,7 +63,7 @@ vector<Node*> findNeighbors(const Node& node, const vector<vector<int>>& grid) {
 
         if (checkValid(tempX, tempY, grid)) {
 
-            neighbors.push_back(new Node(tempX, tempY));
+            neighbors.emplace_back(tempX, tempY, node));
 
         }
     }
@@ -64,26 +75,26 @@ vector<Node*> findNeighbors(const Node& node, const vector<vector<int>>& grid) {
 // A* algorithm function
 void astar(const vector<vector<int>>& grid, Node begin, Node end) {
 
-    priority_queue<Node*, vector<Node*>, PickNode> openSet;
+    priority_queue<Node, vector<Node>, PickNode> openSet;
     vector<Node*> closedSet;
 
-    openSet.push(new Node(begin));
+    openSet.push(begin);
 
     while (!openSet.empty()) {
 
-        Node* nodeCurr = openSet.top();
+        Node nodeCurr = openSet.top();
         openSet.pop();
 
         closedSet.push_back(nodeCurr);
 
-        if (nodeCurr->x == end.x && nodeCurr->y == end.y) {
+        if (nodeCurr.x == end.x && nodeCurr.y == end.y) {
 
             // Reconstruct and print the path
-            Node* path = nodeCurr;
+            Node* path = &nodeCurr;
 
             while (path != nullptr) {
 
-                pathNode = path->parent;
+                pathNode = &path->parent;
 
             }
 
@@ -91,28 +102,27 @@ void astar(const vector<vector<int>>& grid, Node begin, Node end) {
 
         }
 
-        vector<Node*> neighbors = findNeighbors(*nodeCurr, grid);
+        vector<Node> neighbors = findNeighbors(nodeCurr, grid);
 
-        for (Node* neighbor : neighbors) {
+        for (const Node& neighbor : neighbors) {
 
             // Check if the neighbor is in the closed set
-            auto val = find_if(closedSet.begin(), closedSet.end(), [&](const Node* temp) {return temp->x == neighbor->x && temp->y == neighbor->y;});
+            auto val = find_if(closedSet.begin(), closedSet.end(), NodeEqual(neighbor.x, neighbor.y));
 
             if (val != closedSet.end()) {
                 continue;
             }
 
-            double tempGVal = nodeCurr->g + 1; //Uniform costs
+            double tempGVal = nodeCurr.g + 1; //Uniform costs
 
             // Check if neighbor is in open set or alternate path is optimal
-            auto valOpen = find_if(openSet.c.begin(), openSet.c.end(), [&](const Node* temp) {return temp->x == neighbor->x && temp->y == neighbor->y;});
+            auto valOpen = find_if(openSet.c.begin(), openSet.c.end(), NodeEqual(neighbor.x, neighbor.y)});
 
-            if (valOpen == openSet.end() || tempGVal < neighbor->g) {
+            if (valOpen == openSet.end() || tempGVal < neighbor.g) {
 
-                neighbor->g = tempGVal;
-                neighbor->h = neighbor->heuristic(end);
-                neighbor->f = neighbor->g + neighbor->h;
-                neighbor->parent = nodeCurr;
+                neighbor.g = tempGVal;
+                neighbor.h = neighbor.heuristic(end);
+                neighbor.f = neighbor.g + neighbor.h;
 
                 if (valOpen == openSet.end()) {
 
@@ -121,14 +131,6 @@ void astar(const vector<vector<int>>& grid, Node begin, Node end) {
                 }
             }
         }
-    }
-
-    // Clean up allocated memory
-    for (Node* node : closedSet) {
-        delete node;
-    }
-    for (Node* node : openSet) {
-        delete node;
     }
 }
 
