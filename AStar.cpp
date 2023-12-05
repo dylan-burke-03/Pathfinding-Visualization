@@ -6,23 +6,13 @@
 
 using namespace std;
 
-struct NodeEqual {
-  int x;
-  int y;
-
-  NodeEqual(int x, int y)
-    : x(x)
-    , y(y)
-  {
-  }
-
   bool operator()(const AdjMatrix::node& node) const
   {
     return node.x == x && node.y == y;
   }
 };
 
-struct PickNode {
+struct PickNode { //Allows for the comparing of two neighboring nodes to check cost
   bool operator()(const AdjMatrix::node* left, const AdjMatrix::node* right) const
   {
 
