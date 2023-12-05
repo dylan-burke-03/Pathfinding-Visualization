@@ -21,7 +21,7 @@ struct CompareNodes {
     }
 };
 
-void dijkstra(vector<vector<Node>>& grid, Node& begin, Node& end) {
+void dijkstra(const vector<vector<Node>>& adjacencyMatrix, vector<vector<Node>>& grid, Node& begin, Node& end) {
     priority_queue<Node, vector<Node>, CompareNodes> pq;
     pq.push(begin);
     begin.distance = 0;
